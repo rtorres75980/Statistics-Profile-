@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        #input-container {
+            margin-bottom: 20px;
+        }
+        #result-container {
+            display: none;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-container">
+        <label for="numbers">Enter numbers (separated by commas):</label><br>
+        <input type="text" id="numbers"><br>
+        <button onclick="calculate()">Calculate</button>
+    </div>
+
+    <div id="result-container">
+        <table>
+            <tr>
+                <th>Statistic</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Mean</td>
+                <td id="mean"></td>
+            </tr>
+            <tr>
+                <td>Median</td>
+                <td id="median"></td>
+            </tr>
+            <tr>
+                <td>Standard Deviation</td>
+                <td id="stdDev"></td>
+            </tr>
+            <tr>
+                <td>Interquartile Range</td>
+                <td id="iqr"></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function calculate() {
+            const numbersInput = document.getElementById('numbers').value;
+            const numbers = numbersInput.split(',').map(Number).filter(Boolean); // Parsing input into an array of numbers
+
+            if (numbers.length === 0) {
+                alert('Please enter at least one number.');
+                return;
+            }
+
+            const mean = calculateMean(numbers);
+            const median = calculateMedian(numbers);
+            const stdDev = calculateStandardDeviation(numbers);
+            const iqr = calculateInterquartileRange(numbers);
+
+            document.getElementById('mean').innerText = mean.toFixed(2);
+            document.getElementById('median').innerText = median.toFixed(2);
+            document.getElementById('stdDev').innerText = stdDev.toFixed(2);
+            document.getElementById('iqr').innerText = iqr.toFixed(2);
+
+            document.getElementById('result-container').style.display = 'block';
+        }
+
+        function calculateMean(numbers) {
+            const sum = numbers.reduce((acc, curr) => acc + curr, 0);
+            return sum / numbers.length;
+        }
+
+        function calculateMedian(numbers) {
+            const sorted = numbers.slice().sort((a, b) => a - b);
+            const middle = Math.floor(sorted.length / 2);
+            if (sorted.length % 2 === 0) {
+                return (sorted[middle - 1] + sorted[middle]) / 2;
+            } else {
+                return sorted[middle];
+            }
+        }
+
+        function calculateStandardDeviation(numbers) {
+            const mean = calculateMean(numbers);
+            const squaredDiffs = numbers.map(num => Math.pow(num - mean, 2));
+            const avgSquaredDiff = calculateMean(squaredDiffs);
+            return Math.sqrt(avgSquaredDiff);
+        }
+
+        function calculateInterquartileRange(numbers) {
+            const sorted = numbers.slice().sort((a, b) => a - b);
+            const lowerQ = quartile(sorted, 0.25);
+            const upperQ = quartile(sorted, 0.75);
+            return upperQ - lowerQ;
+        }
+
+        function quartile(sortedArray, percentile) {
+            const index = (sortedArray.length - 1) * percentile;
+            const lower = Math.floor(index);
+            const fraction = index - lower;
+            if (lower + 1 < sortedArray.length) {
+                return sortedArray[lower] + fraction * (sortedArray[lower + 1] - sortedArray[lower]);
+            } else {
+                return sortedArray[lower];
+            }
+        }
+    </script>
+</body>
+</html>
